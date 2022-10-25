@@ -15,21 +15,20 @@ import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.ycmjason.metronome.presentation.TEMPO_TAP_RESET_MS
-import com.ycmjason.metronome.presentation.composables.OnPause
+import com.ycmjason.metronome.presentation.composables.onPause
 import com.ycmjason.metronome.presentation.theme.MetronomeTheme
 import com.ycmjason.metronome.presentation.util.debounce
 import com.ycmjason.metronome.presentation.util.tempoToInterval
+import kotlin.math.min
 
 @Composable
-fun MetronomeApp() {
+fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
     var tempoOrNull by remember { mutableStateOf<Long?>(null) }
     var isTicking by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
-    DisposableEffect(isTicking, tempoOrNull) {
+    val vibrator = useVibrator()
+    DisposableEffect(vibrator, isTicking, tempoOrNull) {
         val tempo = tempoOrNull ?: return@DisposableEffect onDispose {}
-
-        val vibrator = getVibrator(context)
 
         if (isTicking) vibrator.vibrate(
             createTempoVibrationWaveform(beatsPerBar = 4, tempo = tempo)
@@ -38,7 +37,12 @@ fun MetronomeApp() {
         onDispose { vibrator.cancel() }
     }
 
-    OnPause {
+    DisposableEffect(isTicking) {
+        setKeepScreenOn(isTicking)
+        onDispose { setKeepScreenOn(false) }
+    }
+
+    onPause {
         val lastTickingState = isTicking
         isTicking = false
         onResume {
@@ -81,16 +85,17 @@ fun MetronomeApp() {
 
 fun createTempoVibrationWaveform(tempo: Long, beatsPerBar: Long): VibrationEffect =
     VibrationEffect.createWaveform(
-        (0..beatsPerBar).flatMap {
-            listOf(if (it == 0L) 50L else 80L, tempoToInterval(tempo))
+        (1..beatsPerBar).flatMap {
+            val beatInterval = tempoToInterval(tempo)
+            val beatVibrateDuration = min(150.0, beatInterval.toFloat() * 0.5).toLong()
+            listOf(beatVibrateDuration, beatInterval - beatVibrateDuration)
         }
             .toLongArray(),
-        (0..beatsPerBar).flatMap {
-            listOf(VibrationEffect.DEFAULT_AMPLITUDE, 0)
-        }.toIntArray(),
+        (1..beatsPerBar).flatMap { listOf(255, 0) }.toIntArray(),
         0
     )
 
-fun getVibrator(context: Context): Vibrator {
-    return context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+@Composable
+fun useVibrator(): Vibrator {
+    return LocalContext.current.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 }
