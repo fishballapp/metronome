@@ -1,4 +1,4 @@
-package com.ycmjason.metronome.presentation.composables
+package com.wearda.metronome.presentation.composables
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable

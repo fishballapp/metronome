@@ -1,4 +1,4 @@
-package com.ycmjason.metronome.presentation.util
+package com.wearda.metronome.presentation.util
 
 import java.time.Instant
 

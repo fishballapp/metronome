@@ -1,4 +1,4 @@
-package com.ycmjason.metronome.presentation.ui
+package com.wearda.metronome.presentation.ui
 
 import android.content.Context
 import android.os.VibrationEffect
@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
-import com.ycmjason.metronome.presentation.TEMPO_TAP_RESET_MS
-import com.ycmjason.metronome.presentation.composables.onPause
-import com.ycmjason.metronome.presentation.theme.MetronomeTheme
-import com.ycmjason.metronome.presentation.util.debounce
-import com.ycmjason.metronome.presentation.util.tempoToInterval
+import com.wearda.metronome.presentation.TEMPO_TAP_RESET_MS
+import com.wearda.metronome.presentation.composables.onPause
+import com.wearda.metronome.presentation.theme.MetronomeTheme
+import com.wearda.metronome.presentation.util.debounce
+import com.wearda.metronome.presentation.util.tempoToInterval
 import kotlin.math.min
 
 @Composable

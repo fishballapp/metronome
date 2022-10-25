@@ -1,4 +1,4 @@
-package com.ycmjason.metronome.presentation.ui
+package com.wearda.metronome.presentation.ui
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.*
@@ -6,9 +6,9 @@ import androidx.compose.ui.Modifier
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.MaterialTheme
-import com.ycmjason.metronome.presentation.TEMPO_TAP_RESET_MS
-import com.ycmjason.metronome.presentation.util.getEpochNow
-import com.ycmjason.metronome.presentation.util.intervalToTempoBpm
+import com.wearda.metronome.presentation.TEMPO_TAP_RESET_MS
+import com.wearda.metronome.presentation.util.getEpochNow
+import com.wearda.metronome.presentation.util.intervalToTempoBpm
 
 @Composable
 fun TempoTapButton(

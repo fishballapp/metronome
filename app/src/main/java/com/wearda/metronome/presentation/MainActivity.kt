@@ -4,7 +4,7 @@
  * changes to the libraries and their usages.
  */
 
-package com.ycmjason.metronome.presentation
+package com.wearda.metronome.presentation
 
 import android.os.Bundle
 import android.view.WindowManager
@@ -13,7 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import com.ycmjason.metronome.presentation.ui.MetronomeApp
+import com.wearda.metronome.presentation.ui.MetronomeApp
 
 class MainActivity : ComponentActivity() {
 
