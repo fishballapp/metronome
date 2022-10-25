@@ -15,6 +15,7 @@ import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.ycmjason.metronome.presentation.TEMPO_TAP_RESET_MS
+import com.ycmjason.metronome.presentation.composables.OnPause
 import com.ycmjason.metronome.presentation.theme.MetronomeTheme
 import com.ycmjason.metronome.presentation.util.debounce
 import com.ycmjason.metronome.presentation.util.tempoToInterval
@@ -37,6 +38,13 @@ fun MetronomeApp() {
         onDispose { vibrator.cancel() }
     }
 
+    OnPause {
+        val lastTickingState = isTicking
+        isTicking = false
+        onResume {
+            isTicking = lastTickingState
+        }
+    }
 
     val startVibrateDebounced =
         debounce(TEMPO_TAP_RESET_MS, rememberCoroutineScope()) { isTicking = true }
@@ -69,6 +77,7 @@ fun MetronomeApp() {
         }
     }
 }
+
 
 fun createTempoVibrationWaveform(tempo: Long, beatsPerBar: Long): VibrationEffect =
     VibrationEffect.createWaveform(
