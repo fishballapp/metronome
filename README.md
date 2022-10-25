@@ -1,6 +1,6 @@
 # WearDa Metronome
 
-A simple metronome created to help musicians practise.
+A simple metronome WearOS app created to help musicians practise.
 
 ## Author
 
