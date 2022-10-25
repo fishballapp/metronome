@@ -28,11 +28,11 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
 
     val vibrator = useVibrator()
     DisposableEffect(vibrator, isTicking, tempoOrNull) {
-        val tempo = tempoOrNull ?: return@DisposableEffect onDispose {}
-
-        if (isTicking) vibrator.vibrate(
-            createTempoVibrationWaveform(beatsPerBar = 4, tempo = tempo)
-        )
+        val tempo = tempoOrNull
+        if (tempo != null && isTicking)
+            vibrator.vibrate(
+                createTempoVibrationWaveform(tempo)
+            )
 
         onDispose { vibrator.cancel() }
     }
@@ -47,35 +47,41 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
         isTicking = false
         onResume {
             isTicking = lastTickingState
+            if (!isTicking) tempoOrNull = null
         }
     }
 
-    val startVibrateDebounced =
-        debounce(TEMPO_TAP_RESET_MS, rememberCoroutineScope()) { isTicking = true }
+    val startVibrateDebounced = debounce(TEMPO_TAP_RESET_MS) { isTicking = true }
 
     MetronomeTheme {
-        TempoTapButton(modifier = Modifier.fillMaxSize(), onTempoSet = { newTempo ->
-            tempoOrNull = newTempo
-            startVibrateDebounced()
-        }) {
+        if (!isTicking) {
+            TempoTapButton(modifier = Modifier.fillMaxSize(), onTempoSet = { newTempo ->
+                tempoOrNull = newTempo
+                startVibrateDebounced()
+            }) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(if (tempoOrNull != null) "Tempo: $tempoOrNull" else "Tap your tempo, yo")
+                }
+            }
+        } else {
             Column(
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = if (tempoOrNull != null) "Tempo: $tempoOrNull" else "Tap your tempo, yo"
-                )
-                if (isTicking) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Button(onClick = {
-                        isTicking = false
-                        tempoOrNull = null
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Stop,
-                            contentDescription = "stop metronome"
-                        )
-                    }
+                Text("Tempo: $tempoOrNull")
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(onClick = {
+                    isTicking = false
+                    tempoOrNull = null
+                }) {
+                    Icon(
+                        imageVector = Icons.Rounded.Stop,
+                        contentDescription = "stop metronome"
+                    )
                 }
             }
         }
@@ -83,15 +89,14 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
 }
 
 
-fun createTempoVibrationWaveform(tempo: Long, beatsPerBar: Long): VibrationEffect =
+fun createTempoVibrationWaveform(tempo: Long): VibrationEffect =
     VibrationEffect.createWaveform(
-        (1..beatsPerBar).flatMap {
+        run {
             val beatInterval = tempoToInterval(tempo)
             val beatVibrateDuration = min(150.0, beatInterval.toFloat() * 0.5).toLong()
-            listOf(beatVibrateDuration, beatInterval - beatVibrateDuration)
-        }
-            .toLongArray(),
-        (1..beatsPerBar).flatMap { listOf(255, 0) }.toIntArray(),
+            listOf(beatVibrateDuration, beatInterval - beatVibrateDuration).toLongArray()
+        },
+        intArrayOf(255, 0),
         0
     )
 

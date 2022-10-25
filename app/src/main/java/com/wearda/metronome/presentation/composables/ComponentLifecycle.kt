@@ -1,11 +1,10 @@
 package com.wearda.metronome.presentation.composables
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 
 class Destroyable(val onDestroy: (handler: () -> Unit) -> Unit)
 class Stoppable(val onStop: (handler: () -> Unit) -> Unit)
@@ -21,50 +20,45 @@ fun ComponentLifecycle(
     onResume: () -> Unit = {},
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val observer = object : DefaultLifecycleObserver {
-        var onDestroy2 = {}
-        var onStop2 = {}
-        var onResume2 = {}
-        override fun onPause(owner: LifecycleOwner) {
-            super.onPause(owner)
-            with(Resumable { onResume2 = it }) {
-                onPause()
+    var onDestroy2 by remember { mutableStateOf({}) }
+    var onStop2 by remember { mutableStateOf({}) }
+    var onResume2 by remember { mutableStateOf({}) }
+    val observer = remember {
+        LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+                    with(Destroyable { onDestroy2 = it }) {
+                        onCreate()
+                    }
+                }
+                Lifecycle.Event.ON_DESTROY -> {
+                    onDestroy()
+                    onDestroy2()
+                }
+                Lifecycle.Event.ON_PAUSE -> {
+                    with(Resumable { onResume2 = it }) {
+                        onPause()
+                    }
+                }
+                Lifecycle.Event.ON_RESUME -> {
+                    onResume()
+                    onResume2()
+                }
+                Lifecycle.Event.ON_START -> {
+                    with(Stoppable { onStop2 = it }) {
+                        onStart()
+                    }
+                }
+                Lifecycle.Event.ON_STOP -> {
+                    onStop()
+                    onStop2()
+                }
+                else -> {}
             }
-        }
-
-        override fun onResume(owner: LifecycleOwner) {
-            super.onResume(owner)
-            onResume()
-            onResume2()
-        }
-
-        override fun onStart(owner: LifecycleOwner) {
-            super.onStart(owner)
-            with(Stoppable { onStop2 = it }) {
-                onStart()
-            }
-        }
-
-        override fun onStop(owner: LifecycleOwner) {
-            super.onStop(owner)
-            onStop()
-            onStop2()
-        }
-
-        override fun onCreate(owner: LifecycleOwner) {
-            super.onCreate(owner)
-            with(Destroyable { onDestroy2 = it }) {
-                onCreate()
-            }
-        }
-
-        override fun onDestroy(owner: LifecycleOwner) {
-            super.onDestroy(owner)
-            onDestroy()
-            onDestroy2()
         }
     }
-    DisposableEffect(lifecycleOwner, observer) {
+
+    DisposableEffect(lifecycleOwner) {
         val lifecycle = lifecycleOwner.lifecycle
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }

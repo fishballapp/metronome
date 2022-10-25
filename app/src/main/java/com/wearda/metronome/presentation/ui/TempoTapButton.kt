@@ -7,6 +7,7 @@ import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.MaterialTheme
 import com.wearda.metronome.presentation.TEMPO_TAP_RESET_MS
+import com.wearda.metronome.presentation.composables.onPause
 import com.wearda.metronome.presentation.util.getEpochNow
 import com.wearda.metronome.presentation.util.intervalToTempoBpm
 
@@ -17,6 +18,8 @@ fun TempoTapButton(
     content: @Composable BoxScope.() -> Unit,
 ) {
     var tapTimes by remember { mutableStateOf(listOf<Long>()) }
+
+    onPause { tapTimes = listOf() }
 
     Button(
         modifier = modifier,
@@ -31,8 +34,7 @@ fun TempoTapButton(
             if (tapTimes.size > 1) {
                 onTempoSet(
                     intervalToTempoBpm(
-                        tapTimes.zip(tapTimes.drop(1)).map { (t1, t2) -> t2 - t1 }.average()
-                            .toLong()
+                        tapTimes.zipWithNext { t1, t2 -> t2 - t1 }.average().toLong()
                     )
                 )
             }
