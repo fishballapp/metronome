@@ -9,8 +9,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun debounce(
     waitMs: Long = 300L,
-    destinationFunction: () -> Unit
+    cb: () -> Unit,
 ): () -> Unit {
+    val debounced = debounce<Unit>(waitMs) { cb() }
+    return { debounced(Unit) }
+}
+
+@Composable
+fun <T> debounce(
+    waitMs: Long = 300L,
+    cb: (T) -> Unit
+): (T) -> Unit {
     val coroutineScope = rememberCoroutineScope()
     var debounceJob by remember { mutableStateOf<Job?>(null) }
 
@@ -20,7 +29,7 @@ fun debounce(
         debounceJob?.cancel()
         debounceJob = coroutineScope.launch {
             delay(waitMs)
-            destinationFunction()
+            cb(it)
         }
     }
 }
