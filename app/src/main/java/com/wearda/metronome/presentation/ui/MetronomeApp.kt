@@ -3,7 +3,9 @@ package com.wearda.metronome.presentation.ui
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
+import androidx.compose.animation.core.EaseInExpo
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Stop
@@ -14,44 +16,44 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.wearda.metronome.presentation.TEMPO_TAP_RESET_MS
+import com.wearda.metronome.presentation.composables.getDisplayWidthDp
+import com.wearda.metronome.presentation.composables.getScreenShape
 import com.wearda.metronome.presentation.composables.onPause
+import com.wearda.metronome.presentation.composables.simpleTargetBasedAnimation
 import com.wearda.metronome.presentation.theme.MetronomeTheme
-import com.wearda.metronome.presentation.util.debounce
 import com.wearda.metronome.presentation.util.tempoToInterval
 import kotlin.math.min
 
 @Composable
 fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
     var tempoOrNull by remember { mutableStateOf<Long?>(null) }
+
     val navController = rememberSwipeDismissableNavController()
-    val startVibrateDebounced = debounce(TEMPO_TAP_RESET_MS) { navController.navigate("ticking") }
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    var isTicking = remember(currentBackStackEntry?.destination?.route) {
-        val route = currentBackStackEntry?.destination?.route
-        Log.v("isTicking", "$route")
-        route == "ticking"
-    }
+    var isTicking =
+        remember(currentBackStackEntry?.destination?.route) { currentBackStackEntry?.destination?.route == "ticking" }
 
     val vibrator = useVibrator()
     DisposableEffect(vibrator, isTicking, tempoOrNull) {
         val tempo = tempoOrNull
-        if (tempo != null && isTicking)
-            vibrator.vibrate(
-                createTempoVibrationWaveform(tempo)
-            )
+        if (tempo != null && isTicking) vibrator.vibrate(
+            createTempoVibrationWaveform(tempo)
+        )
 
         onDispose { vibrator.cancel() }
     }
 
-    DisposableEffect(isTicking) {
-        setKeepScreenOn(isTicking)
+    DisposableEffect(tempoOrNull) {
+        if (tempoOrNull != null) setKeepScreenOn(true)
+
         onDispose { setKeepScreenOn(false) }
     }
 
@@ -66,20 +68,35 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
 
     MetronomeTheme {
         SwipeDismissableNavHost(
-            navController = navController,
-            startDestination = "init"
+            navController = navController, startDestination = "init"
         ) {
             composable("init") {
-                TempoTapButton(modifier = Modifier.fillMaxSize(), onTempoSet = { newTempo ->
-                    tempoOrNull = newTempo
-                    startVibrateDebounced()
-                }) {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(if (tempoOrNull != null) "Tempo: $tempoOrNull" else "Tap your tempo, yo")
+                val borderAnimationController = simpleTargetBasedAnimation(
+                    initialValue = 0f,
+                    targetValue = getDisplayWidthDp().value / 2,
+                    animationSpec = tween(
+                        durationMillis = TEMPO_TAP_RESET_MS.toInt(),
+                        easing = EaseInExpo
+                    ),
+                    onFinished = { navController.navigate("ticking") }
+                )
+                TempoTapButton(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(
+                            width = borderAnimationController.value.dp,
+                            color = MaterialTheme.colors.background,
+                            shape = getScreenShape()
+                        ),
+                    onTempoSet = { newTempo ->
+                        borderAnimationController.start()
+                        tempoOrNull = newTempo
                     }
+                ) {
+                    Text(
+                        if (tempoOrNull != null) "Tempo: $tempoOrNull" else "Tap your tempo, yo",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
 
@@ -96,8 +113,7 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
                         tempoOrNull = null
                     }) {
                         Icon(
-                            imageVector = Icons.Rounded.Stop,
-                            contentDescription = "stop metronome"
+                            imageVector = Icons.Rounded.Stop, contentDescription = "stop metronome"
                         )
                     }
                 }
@@ -106,17 +122,13 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
     }
 }
 
-
-fun createTempoVibrationWaveform(tempo: Long): VibrationEffect =
-    VibrationEffect.createWaveform(
-        run {
-            val beatInterval = tempoToInterval(tempo)
-            val beatVibrateDuration = min(150.0, beatInterval.toFloat() * 0.5).toLong()
-            listOf(beatVibrateDuration, beatInterval - beatVibrateDuration).toLongArray()
-        },
-        intArrayOf(255, 0),
-        0
-    )
+fun createTempoVibrationWaveform(tempo: Long): VibrationEffect = VibrationEffect.createWaveform(
+    run {
+        val beatInterval = tempoToInterval(tempo)
+        val beatVibrateDuration = min(100.0, beatInterval.toFloat() * 0.5).toLong()
+        listOf(beatVibrateDuration, beatInterval - beatVibrateDuration).toLongArray()
+    }, intArrayOf(255, 0), 0
+)
 
 @Composable
 fun useVibrator(): Vibrator {

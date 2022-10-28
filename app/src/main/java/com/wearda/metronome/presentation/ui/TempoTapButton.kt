@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.ButtonColors
 import androidx.wear.compose.material.ButtonDefaults
-import androidx.wear.compose.material.MaterialTheme
 import com.wearda.metronome.presentation.TEMPO_TAP_RESET_MS
 import com.wearda.metronome.presentation.composables.onPause
 import com.wearda.metronome.presentation.util.getEpochNow
@@ -14,6 +14,7 @@ import com.wearda.metronome.presentation.util.intervalToTempoBpm
 @Composable
 fun TempoTapButton(
     modifier: Modifier = Modifier,
+    colors: ButtonColors = ButtonDefaults.primaryButtonColors(),
     onTempoSet: (timeElapsed: Long) -> Unit,
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -23,7 +24,7 @@ fun TempoTapButton(
 
     Button(
         modifier = modifier,
-        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.background),
+        colors = colors,
         onClick = {
             val now = getEpochNow()
             tapTimes = run {
