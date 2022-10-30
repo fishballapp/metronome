@@ -5,61 +5,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 
 class Destroyable(val onDestroy: (handler: () -> Unit) -> Unit)
 class Stoppable(val onStop: (handler: () -> Unit) -> Unit)
 class Resumable(val onResume: (handler: () -> Unit) -> Unit)
 
 @Composable
-fun ComponentLifecycle(
-    onCreate: Destroyable.() -> Unit = {},
-    onDestroy: () -> Unit = {},
-    onStart: Stoppable.() -> Unit = {},
-    onStop: () -> Unit = {},
-    onPause: Resumable.() -> Unit = {},
-    onResume: () -> Unit = {},
-) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var onDestroy2 by remember { mutableStateOf({}) }
-    var onStop2 by remember { mutableStateOf({}) }
-    var onResume2 by remember { mutableStateOf({}) }
-    val observer = remember {
-        LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> {
-                    with(Destroyable { onDestroy2 = it }) {
-                        onCreate()
-                    }
-                }
-                Lifecycle.Event.ON_DESTROY -> {
-                    onDestroy()
-                    onDestroy2()
-                }
-                Lifecycle.Event.ON_PAUSE -> {
-                    with(Resumable { onResume2 = it }) {
-                        onPause()
-                    }
-                }
-                Lifecycle.Event.ON_RESUME -> {
-                    onResume()
-                    onResume2()
-                }
-                Lifecycle.Event.ON_START -> {
-                    with(Stoppable { onStop2 = it }) {
-                        onStart()
-                    }
-                }
-                Lifecycle.Event.ON_STOP -> {
-                    onStop()
-                    onStop2()
-                }
-                else -> {}
-            }
-        }
-    }
-
-    DisposableEffect(lifecycleOwner) {
-        val lifecycle = lifecycleOwner.lifecycle
+fun lifecycleObserve(observerCb: (LifecycleOwner, Lifecycle.Event) -> Unit) {
+    val currentLifecycle = LocalLifecycleOwner.current.lifecycle
+    val observer = remember { LifecycleEventObserver(observerCb) }
+    DisposableEffect(currentLifecycle, observer) {
+        val lifecycle = currentLifecycle
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
@@ -68,35 +25,95 @@ fun ComponentLifecycle(
 @SuppressLint("ComposableNaming")
 @Composable
 fun onStart(handler: Stoppable.() -> Unit) {
-    ComponentLifecycle(onStart = handler)
+    var onStop: (() -> Unit)? by remember { mutableStateOf(null) }
+    lifecycleObserve { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START -> {
+                with(Stoppable { onStop = it }) {
+                    handler()
+                }
+            }
+            Lifecycle.Event.ON_STOP -> {
+                onStop?.invoke()
+            }
+            else -> {}
+        }
+    }
 }
 
 @SuppressLint("ComposableNaming")
 @Composable
 fun onStop(handler: () -> Unit) {
-    ComponentLifecycle(onStop = handler)
+    lifecycleObserve { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_STOP -> {
+                handler()
+            }
+            else -> {}
+        }
+    }
 }
 
 @SuppressLint("ComposableNaming")
 @Composable
 fun onCreate(handler: Destroyable.() -> Unit) {
-    ComponentLifecycle(onCreate = handler)
+    var onDestroy: (() -> Unit)? = null
+    lifecycleObserve { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_CREATE -> {
+                with(Destroyable { onDestroy = it }) {
+                    handler()
+                }
+            }
+            Lifecycle.Event.ON_DESTROY -> {
+                onDestroy?.invoke()
+            }
+            else -> {}
+        }
+    }
 }
 
 @SuppressLint("ComposableNaming")
 @Composable
 fun onDestroy(handler: () -> Unit) {
-    ComponentLifecycle(onDestroy = handler)
+    lifecycleObserve { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_DESTROY -> {
+                handler()
+            }
+            else -> {}
+        }
+    }
 }
 
 @SuppressLint("ComposableNaming")
 @Composable
 fun onPause(handler: Resumable.() -> Unit) {
-    ComponentLifecycle(onPause = handler)
+    var onResume: (() -> Unit)? = null
+    lifecycleObserve { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_PAUSE -> {
+                with(Resumable { onResume = it }) {
+                    handler()
+                }
+            }
+            Lifecycle.Event.ON_RESUME -> {
+                onResume?.invoke()
+            }
+            else -> {}
+        }
+    }
 }
 
 @SuppressLint("ComposableNaming")
 @Composable
 fun onResume(handler: () -> Unit) {
-    ComponentLifecycle(onResume = handler)
+    lifecycleObserve { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
+                handler()
+            }
+            else -> {}
+        }
+    }
 }
