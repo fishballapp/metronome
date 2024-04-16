@@ -16,7 +16,6 @@ import androidx.wear.compose.material.Text
 import com.wearda.metronome.presentation.TEMPO_TAP_RESET_MS
 import com.wearda.metronome.presentation.composables.getDisplayWidthDp
 import com.wearda.metronome.presentation.composables.getScreenShape
-import com.wearda.metronome.presentation.composables.onCreate
 import com.wearda.metronome.presentation.composables.simpleTargetBasedAnimation
 import com.wearda.metronome.presentation.theme.MetronomeTheme
 
@@ -35,10 +34,6 @@ fun TempoTapPage(
         ),
         onFinished = { onStartTicking.invoke() }
     )
-
-    onCreate {
-        onSetTempo.invoke(null)
-    }
 
     TempoTapButton(
         modifier = Modifier

@@ -10,6 +10,24 @@ import androidx.lifecycle.LifecycleOwner
 class Destroyable(val onDestroy: (handler: () -> Unit) -> Unit)
 class Stoppable(val onStop: (handler: () -> Unit) -> Unit)
 class Resumable(val onResume: (handler: () -> Unit) -> Unit)
+class Pauseable(val onPause: (handler: () -> Unit) -> Unit)
+
+@Composable
+fun getLifecycleState(): Lifecycle.State {
+    val currentLifecycle = LocalLifecycleOwner.current.lifecycle
+    var lifecycleState by remember { mutableStateOf(currentLifecycle.currentState) }
+    val observer = remember {
+        LifecycleEventObserver { owner, event ->
+            lifecycleState = owner.lifecycle.currentState
+        }
+    }
+    DisposableEffect(currentLifecycle) {
+        val lifecycle = currentLifecycle
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+    return lifecycleState
+}
 
 @Composable
 fun lifecycleObserve(observerCb: (LifecycleOwner, Lifecycle.Event) -> Unit) {
@@ -107,11 +125,17 @@ fun onPause(handler: Resumable.() -> Unit) {
 
 @SuppressLint("ComposableNaming")
 @Composable
-fun onResume(handler: () -> Unit) {
+fun onResume(handler: Pauseable.() -> Unit) {
+    var onPause: (() -> Unit)? = null
     lifecycleObserve { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                handler()
+                with(Pauseable(onPause = { onPause = it })) {
+                    handler()
+                }
+            }
+            Lifecycle.Event.ON_PAUSE -> {
+                onPause?.invoke()
             }
             else -> {}
         }

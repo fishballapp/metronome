@@ -1,14 +1,20 @@
 package com.wearda.metronome.presentation.ui
 
+import android.util.Log
 import androidx.compose.runtime.*
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.wearda.metronome.presentation.composables.onStart
 import com.wearda.metronome.presentation.theme.MetronomeTheme
 
 class AppContext(val setKeepScreenOn: (Boolean) -> Unit)
 
-val LocalAppContext = compositionLocalOf { AppContext(setKeepScreenOn = {}) }
+val LocalAppContext = compositionLocalOf {
+    AppContext(setKeepScreenOn = {
+        Log.e("LocalAppContext", "setKeepScreenOn is called but not provided")
+    })
+}
 
 @Composable
 fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
@@ -23,6 +29,8 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
                 startDestination = "tempoTap"
             ) {
                 composable("tempoTap") {
+                    onStart { tempoOrNull = null }
+
                     TempoTapPage(
                         tempoOrNull = tempoOrNull,
                         onSetTempo = { tempoOrNull = it },
@@ -31,13 +39,11 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
                 }
 
                 composable("ticking") {
-                    val tempo = tempoOrNull
-                    if (tempo == null) {
+                    val tempo = tempoOrNull ?: return@composable
+                    TickingPage(tempo, onStop = {
+                        Log.v("TickingPage", "onStop")
                         navController.navigateUp()
-                        return@composable
-                    }
-
-                    TickingPage(tempo, onStop = { navController.navigate("tempoTap") })
+                    })
                 }
             }
         }
