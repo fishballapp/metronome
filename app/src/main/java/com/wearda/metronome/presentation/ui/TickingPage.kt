@@ -6,11 +6,13 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.runtime.Composable
@@ -19,18 +21,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.OutlinedButton
+import androidx.wear.tooling.preview.devices.WearDevices
 import com.wearda.metronome.presentation.composables.getLifecycleState
+import com.wearda.metronome.presentation.composables.getScreenShape
 import com.wearda.metronome.presentation.theme.MetronomeTheme
 import com.wearda.metronome.presentation.util.tempoToInterval
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -41,7 +43,6 @@ fun TickingPage(tempo: Long, onStop: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     DisposableEffect(vibrator, tempo, lifecycleState == Lifecycle.State.RESUMED) {
         val job = coroutineScope.launch {
-            delay(700) // allow app to fully come to foreground
             if (lifecycleState == Lifecycle.State.RESUMED) {
                 vibrator.vibrate(createTempoVibrationWaveform(tempo))
             }
@@ -64,24 +65,39 @@ fun TickingPage(tempo: Long, onStop: () -> Unit) {
 
 @Composable
 fun TickingPageUi(tempo: Long, onStop: () -> Unit) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text("Tempo: $tempo")
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = onStop) {
-            Icon(
-                imageVector = Icons.Rounded.Stop, contentDescription = "stop metronome"
+            .background(MaterialTheme.colors.background)
+            .border(
+                width = 5.dp,
+                color = MaterialTheme.colors.primary,
+                shape = getScreenShape()
             )
+            .padding(5.dp),
+    ) {
+        TopTitle(title = "Tempo: $tempo")
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            OutlinedButton(
+                modifier = Modifier.size(ButtonDefaults.LargeButtonSize),
+                onClick = onStop
+            ) {
+                Icon(
+                    modifier = Modifier.size(ButtonDefaults.LargeIconSize),
+                    imageVector = Icons.Rounded.Stop,
+                    contentDescription = "stop metronome"
+                )
+            }
         }
     }
 }
 
-@Preview(device = Devices.WEAR_OS_LARGE_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.LARGE_ROUND, showSystemUi = true)
 @Composable
 fun TickingPagePreview() {
     MetronomeTheme {
