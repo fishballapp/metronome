@@ -16,21 +16,20 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import com.wearda.metronome.presentation.ui.MetronomeApp
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MetronomeApp(setKeepScreenOn = { on ->
-                if (on) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            })
-        }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+      MetronomeApp(setKeepScreenOn = { on ->
+        if (on) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      })
     }
+  }
 }
-
 
 @Preview(device = WearDevices.LARGE_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    MetronomeApp()
+  MetronomeApp()
 }
 

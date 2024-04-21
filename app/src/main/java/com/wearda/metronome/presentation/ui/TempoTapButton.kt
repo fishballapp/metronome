@@ -16,30 +16,30 @@ import com.wearda.metronome.presentation.util.intervalToTempoBpm
 
 @Composable
 fun TempoTapButton(
-    modifier: Modifier = Modifier,
-    onTempoSet: (timeElapsed: Long) -> Unit,
-    content: @Composable BoxScope.() -> Unit = {},
+  modifier: Modifier = Modifier,
+  onTempoSet: (timeElapsed: Long) -> Unit,
+  content: @Composable BoxScope.() -> Unit = {},
 ) {
-    var tapTimes by remember { mutableStateOf(listOf<Long>()) }
+  var tapTimes by remember { mutableStateOf(listOf<Long>()) }
 
-    onPause { tapTimes = listOf() }
+  onPause { tapTimes = listOf() }
 
-    Box(
-        modifier = modifier.clickable(onClickLabel = "tap for tempo") {
-            tapTimes = run {
-                val now = getEpochNow()
-                val timeElapsed = now - (tapTimes.lastOrNull() ?: 0)
-                if (timeElapsed > TEMPO_TAP_RESET_MS) listOf(now) else tapTimes + now
-            }
+  Box(
+    modifier = modifier.clickable(onClickLabel = "tap for tempo") {
+      tapTimes = run {
+        val now = getEpochNow()
+        val timeElapsed = now - (tapTimes.lastOrNull() ?: 0)
+        if (timeElapsed > TEMPO_TAP_RESET_MS) listOf(now) else tapTimes + now
+      }
 
-            if (tapTimes.size > 1) {
-                onTempoSet(
-                    intervalToTempoBpm(
-                        tapTimes.zipWithNext { t1, t2 -> t2 - t1 }.average().toLong()
-                    )
-                )
-            }
-        },
-        content = content
-    )
+      if (tapTimes.size > 1) {
+        onTempoSet(
+          intervalToTempoBpm(
+            tapTimes.zipWithNext { t1, t2 -> t2 - t1 }.average().toLong()
+          )
+        )
+      }
+    },
+    content = content
+  )
 }

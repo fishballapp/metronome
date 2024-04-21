@@ -8,5 +8,5 @@ import androidx.compose.ui.platform.LocalConfiguration
 
 @Composable
 fun getScreenShape(): Shape {
-    return if (LocalConfiguration.current.isScreenRound) CircleShape else RectangleShape
+  return if (LocalConfiguration.current.isScreenRound) CircleShape else RectangleShape
 }

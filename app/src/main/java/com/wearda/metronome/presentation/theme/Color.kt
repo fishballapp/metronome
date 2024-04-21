@@ -11,13 +11,13 @@ val SecondaryLightColor = Color(0xffb2fef7)
 val SecondaryDarkColor = Color(0xff4f9a94)
 
 internal val wearColorPalette: Colors = Colors(
-    primary = PrimaryColor,
-    primaryVariant = PrimaryLightColor,
-    secondary = SecondaryColor,
-    secondaryVariant = SecondaryDarkColor,
-    error = Color.Red,
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onError = Color.Black
+  primary = PrimaryColor,
+  primaryVariant = PrimaryLightColor,
+  secondary = SecondaryColor,
+  secondaryVariant = SecondaryDarkColor,
+  error = Color.Red,
+  onPrimary = Color.Black,
+  onSecondary = Color.Black,
+  onError = Color.Black
 )
 

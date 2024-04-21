@@ -24,51 +24,51 @@ import com.wearda.metronome.presentation.theme.MetronomeTheme
 
 @Composable
 fun TempoSetPage(
-    tempo: Long,
-    onSetTempo: (Long) -> Unit,
-    onStartTicking: ((Long) -> Unit),
+  tempo: Long,
+  onSetTempo: (Long) -> Unit,
+  onStartTicking: (Long) -> Unit,
 ) {
-    TempoTapButton(
-        modifier = Modifier
-            .fillMaxSize()
-            .border(
-                width = 5.dp,
-                color = MaterialTheme.colors.primary,
-                shape = getScreenShape()
-            )
-            .padding(5.dp),
-        onTempoSet = onSetTempo
+  TempoTapButton(
+    modifier = Modifier
+      .fillMaxSize()
+      .border(
+        width = 5.dp,
+        color = MaterialTheme.colors.primary,
+        shape = getScreenShape()
+      )
+      .padding(5.dp),
+    onTempoSet = onSetTempo
+  ) {
+    TopTitle("Tap / Set Tempo")
+    Box(
+      modifier = Modifier
+        .fillMaxRectangle(),
     ) {
-        TopTitle("Tap / Set Tempo")
-        Box(
-            modifier = Modifier
-                .fillMaxRectangle(),
-        ) {
-            TempoPicker(
-                tempo = tempo,
-                onSetTempo = onSetTempo,
-                modifier = Modifier.fillMaxSize()
-            )
-            Button(
-                modifier = Modifier
-                    .size(ButtonDefaults.SmallButtonSize)
-                    .align(Alignment.BottomEnd),
-                onClick = { onStartTicking(tempo) }
-            ) {
-                Icon(
-                    Icons.Rounded.PlayArrow,
-                    modifier = Modifier.size(ButtonDefaults.SmallIconSize),
-                    contentDescription = "start metronome",
-                )
-            }
-        }
+      TempoPicker(
+        tempo = tempo,
+        onSetTempo = onSetTempo,
+        modifier = Modifier.fillMaxSize()
+      )
+      Button(
+        modifier = Modifier
+          .size(ButtonDefaults.SmallButtonSize)
+          .align(Alignment.BottomEnd),
+        onClick = { onStartTicking(tempo) }
+      ) {
+        Icon(
+          Icons.Rounded.PlayArrow,
+          modifier = Modifier.size(ButtonDefaults.SmallIconSize),
+          contentDescription = "start metronome",
+        )
+      }
     }
+  }
 }
 
 @Preview(device = WearDevices.LARGE_ROUND, showSystemUi = true)
 @Composable
 fun TempoSetPagePreview() {
-    MetronomeTheme {
-        TempoSetPage(tempo = 90, onSetTempo = {}, onStartTicking = {})
-    }
+  MetronomeTheme {
+    TempoSetPage(tempo = 90, onSetTempo = {}, onStartTicking = {})
+  }
 }

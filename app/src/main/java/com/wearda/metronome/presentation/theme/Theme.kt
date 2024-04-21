@@ -16,45 +16,45 @@ import androidx.wear.tooling.preview.devices.WearDevices
 
 @Composable
 fun MetronomeTheme(
-    content: @Composable () -> Unit
+  content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colors = wearColorPalette, typography = Typography, content = content
-    )
+  MaterialTheme(
+    colors = wearColorPalette, typography = Typography, content = content
+  )
 }
 
 @Preview(device = WearDevices.LARGE_ROUND, showSystemUi = true)
 @Composable
 fun ColorPreview() {
-    val boxModifier = Modifier.size(30.dp)
-    MetronomeTheme {
-        val colors = listOf(
-            MaterialTheme.colors.primary,
-            MaterialTheme.colors.primaryVariant,
-            MaterialTheme.colors.secondary,
-            MaterialTheme.colors.secondaryVariant,
-            MaterialTheme.colors.background,
-            MaterialTheme.colors.surface,
-            MaterialTheme.colors.error,
-            MaterialTheme.colors.onPrimary,
-            MaterialTheme.colors.onSecondary,
-            MaterialTheme.colors.onBackground,
-            MaterialTheme.colors.onSurface,
-            MaterialTheme.colors.onSurfaceVariant,
-            MaterialTheme.colors.onError
-        )
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            for (chunkedColors in colors.chunked(4)) {
-                Row {
-                    for (color in chunkedColors) {
-                        Box(modifier = boxModifier.background(color))
-                    }
-                }
-            }
+  val boxModifier = Modifier.size(30.dp)
+  MetronomeTheme {
+    val colors = listOf(
+      MaterialTheme.colors.primary,
+      MaterialTheme.colors.primaryVariant,
+      MaterialTheme.colors.secondary,
+      MaterialTheme.colors.secondaryVariant,
+      MaterialTheme.colors.background,
+      MaterialTheme.colors.surface,
+      MaterialTheme.colors.error,
+      MaterialTheme.colors.onPrimary,
+      MaterialTheme.colors.onSecondary,
+      MaterialTheme.colors.onBackground,
+      MaterialTheme.colors.onSurface,
+      MaterialTheme.colors.onSurfaceVariant,
+      MaterialTheme.colors.onError
+    )
+    Column(
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+      for (chunkedColors in colors.chunked(4)) {
+        Row {
+          for (color in chunkedColors) {
+            Box(modifier = boxModifier.background(color))
+          }
         }
+      }
     }
+  }
 }
 
