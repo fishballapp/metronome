@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
@@ -19,6 +20,8 @@ import com.wearda.metronome.presentation.DEFAULT_TEMPO
 import com.wearda.metronome.presentation.compositionlocals.LocalUserSettings
 import com.wearda.metronome.presentation.models.DEFAULT_USER_SETTINGS
 import com.wearda.metronome.presentation.theme.MetronomeTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class AppContext(val setKeepScreenOn: (Boolean) -> Unit)
 
@@ -38,11 +41,14 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
   val userSettings by
     LocalUserSettings.current.userPreferencesFlow.collectAsState(initial = DEFAULT_USER_SETTINGS)
 
+  val coroutineScope = rememberCoroutineScope()
+
+  val pagerState = rememberPagerState { 2 }
   CompositionLocalProvider(LocalAppContext provides AppContext(setKeepScreenOn)) {
     MetronomeTheme {
       SwipeDismissableNavHost(navController = navController, startDestination = "tempoSet") {
         composable("tempoSet") {
-          PagerScreen(state = rememberPagerState { 2 }) {
+          PagerScreen(state = pagerState) {
             when (it) {
               0 -> {
                 TempoPage(
@@ -83,7 +89,10 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
         run {
           val onProceed: () -> Unit = {
             navController.popBackStack()
-            isTicking = true
+            coroutineScope.launch {
+              delay(100) // why?
+              isTicking = true
+            }
           }
 
           val onDismiss: () -> Unit = { navController.popBackStack() }
