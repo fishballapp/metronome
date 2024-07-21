@@ -21,20 +21,20 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalWearFoundationApi::class)
 @Composable
 fun TempoPicker(
+  disabled: Boolean,
   tempo: Long,
   onSetTempo: (Long) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val tempoPickerState = rememberPickerState(
-    initialNumberOfOptions = 300,
-    initiallySelectedOption = remember { tempo.toInt() }
-  )
+  val tempoPickerState =
+    rememberPickerState(
+      initialNumberOfOptions = 300,
+      initiallySelectedOption = remember { tempo.toInt() },
+    )
   val focusRequester = rememberActiveFocusRequester()
 
-  LaunchedEffect(tempo) {
-    tempoPickerState.scrollToOption(tempo.toInt())
-  }
+  LaunchedEffect(tempo) { tempoPickerState.scrollToOption(tempo.toInt()) }
 
   LaunchedEffect(tempoPickerState.isScrollInProgress, tempoPickerState.selectedOption) {
     if (!tempoPickerState.isScrollInProgress) {
@@ -43,26 +43,22 @@ fun TempoPicker(
   }
 
   Picker(
-    modifier = modifier
-      .onRotaryScrollEvent {
-        coroutineScope.launch {
-          tempoPickerState.scrollBy(
-            it.verticalScrollPixels
-          )
-          tempoPickerState.animateScrollBy(
-            0f
-          )
+    userScrollEnabled = !disabled,
+    modifier =
+      modifier
+        .onRotaryScrollEvent {
+          if (disabled) return@onRotaryScrollEvent false
+          coroutineScope.launch {
+            tempoPickerState.scrollBy(it.verticalScrollPixels)
+            tempoPickerState.animateScrollBy(0f)
+          }
+          true
         }
-        true
-      }
-      .focusRequester(focusRequester)
-      .focusable(),
+        .focusRequester(focusRequester)
+        .focusable(),
     state = tempoPickerState,
     contentDescription = "Tempo",
   ) {
-    Text(
-      it.toString(),
-      style = MaterialTheme.typography.display1,
-    )
+    Text(it.toString(), style = MaterialTheme.typography.display1)
   }
 }

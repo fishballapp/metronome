@@ -23,7 +23,7 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
 import com.wearda.metronome.presentation.composables.getScreenShape
 import com.wearda.metronome.presentation.compositionlocals.LocalUserSettings
-import com.wearda.metronome.presentation.models.UserSettings
+import com.wearda.metronome.presentation.models.DEFAULT_USER_SETTINGS
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalHorologistApi::class)
@@ -31,8 +31,8 @@ import kotlinx.coroutines.launch
 fun SettingsPage() {
   val coroutineScope = rememberCoroutineScope()
   val localUserSettings = LocalUserSettings.current
-  val userPreferences by
-    localUserSettings.userPreferencesFlow.collectAsState(initial = UserSettings(true, 1))
+  val userSettings by
+    localUserSettings.userPreferencesFlow.collectAsState(initial = DEFAULT_USER_SETTINGS)
 
   Box(
     modifier =
@@ -58,11 +58,9 @@ fun SettingsPage() {
           label = { Text("Freeze tempo while running") },
           checked = false,
           onCheckedChange = {
-            coroutineScope.launch {
-              localUserSettings.updateFreezeTempo(!userPreferences.freezeTempo)
-            }
+            coroutineScope.launch { localUserSettings.updateFreezeTempo(!userSettings.freezeTempo) }
           },
-          toggleControl = { Switch(checked = userPreferences.freezeTempo) },
+          toggleControl = { Switch(checked = userSettings.freezeTempo) },
         )
       }
 
@@ -71,11 +69,11 @@ fun SettingsPage() {
           modifier = Modifier.fillMaxWidth(),
           colors = ChipDefaults.secondaryChipColors(),
           label = { Text("Tempo step size") },
-          secondaryLabel = { Text(userPreferences.tempoStepSize.toString()) },
+          secondaryLabel = { Text(userSettings.tempoStepSize.toString()) },
           onClick = {
             coroutineScope.launch {
               localUserSettings.updateTempoStepSize(
-                when (userPreferences.tempoStepSize) {
+                when (userSettings.tempoStepSize) {
                   1 -> 2
                   2 -> 5
                   5 -> 10

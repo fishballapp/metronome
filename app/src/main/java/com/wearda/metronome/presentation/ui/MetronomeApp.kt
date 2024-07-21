@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -15,6 +16,8 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.google.android.horologist.compose.pager.PagerScreen
 import com.wearda.metronome.presentation.DEFAULT_TEMPO
+import com.wearda.metronome.presentation.compositionlocals.LocalUserSettings
+import com.wearda.metronome.presentation.models.DEFAULT_USER_SETTINGS
 import com.wearda.metronome.presentation.theme.MetronomeTheme
 
 class AppContext(val setKeepScreenOn: (Boolean) -> Unit)
@@ -32,6 +35,9 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
 
   val navController = rememberSwipeDismissableNavController()
 
+  val userSettings by
+    LocalUserSettings.current.userPreferencesFlow.collectAsState(initial = DEFAULT_USER_SETTINGS)
+
   CompositionLocalProvider(LocalAppContext provides AppContext(setKeepScreenOn)) {
     MetronomeTheme {
       SwipeDismissableNavHost(navController = navController, startDestination = "tempoSet") {
@@ -42,6 +48,7 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
                 TempoPage(
                   isTicking = isTicking,
                   tempo = tempo,
+                  canSetTempo = !(userSettings.freezeTempo && isTicking),
                   onSetTempo = { tempo = it },
                   onSetIsTicking = {
                     if (!it) {
