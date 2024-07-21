@@ -19,25 +19,17 @@ import com.wearda.metronome.presentation.composables.getScreenShape
 @Composable
 fun TopTitle(title: String, modifier: Modifier = Modifier) {
   val textStyle = MaterialTheme.typography.caption2
-  val mod = modifier
-    .zIndex(50f)
+  val mod = modifier.zIndex(50f)
   if (getScreenShape() === CircleShape) {
     val curvedTextStyle = CurvedTextStyle(textStyle)
-    CurvedLayout(modifier = mod) {
-      curvedText(title, style = curvedTextStyle)
-    }
+    CurvedLayout(modifier = mod) { curvedText(title, style = curvedTextStyle) }
   } else {
     Row(
-      modifier = mod
-        .fillMaxWidth()
-        .background(MaterialTheme.colors.background),
+      modifier = mod.fillMaxWidth().background(MaterialTheme.colors.background),
       horizontalArrangement = Arrangement.Center,
-      verticalAlignment = Alignment.Top
+      verticalAlignment = Alignment.Top,
     ) {
-      Text(
-        title,
-        style = textStyle
-      )
+      Text(title, style = textStyle)
     }
   }
 }

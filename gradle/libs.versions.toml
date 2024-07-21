@@ -1,16 +1,17 @@
 [versions]
-agp = "8.3.2"
+agp = "8.4.1"
 kotlin = "1.9.0"
-playServicesWearable = "18.1.0"
-composeBom = "2024.04.01"
+playServicesWearable = "18.2.0"
+composeBom = "2024.06.00"
 composeMaterial = "1.3.1"
 composeFoundation = "1.3.1"
-activityCompose = "1.8.2"
+activityCompose = "1.9.0"
 coreSplashscreen = "1.0.1"
 wearToolingPreview = "1.0.0"
 composeNavigation = "1.3.1"
-materialIconsExtended = "1.6.6"
+materialIconsExtended = "1.6.8"
 horologistComposeLayout = "0.6.8"
+datastore = "1.1.1"
 
 [libraries]
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
@@ -28,6 +29,7 @@ wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview",
 compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "composeNavigation" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 horologist-compose-layout = { group = "com.google.android.horologist", name = "horologist-compose-layout", version.ref = "horologistComposeLayout" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 
 [plugins]

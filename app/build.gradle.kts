@@ -13,40 +13,24 @@ android {
     targetSdk = 33
     versionCode = 8
     versionName = "0.4.1"
-    vectorDrawables {
-      useSupportLibrary = true
-    }
-
+    vectorDrawables { useSupportLibrary = true }
   }
 
   buildTypes {
     release {
       isMinifyEnabled = true
       isShrinkResources = true
-      proguardFiles(
-        getDefaultProguardFile("proguard-android-optimize.txt"),
-        "proguard-rules.pro"
-      )
+      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
   }
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-  buildFeatures {
-    compose = true
-  }
-  composeOptions {
-    kotlinCompilerExtensionVersion = "1.5.1"
-  }
-  packaging {
-    resources {
-      excludes += "/META-INF/{AL2.0,LGPL2.1}"
-    }
-  }
+  kotlinOptions { jvmTarget = "1.8" }
+  buildFeatures { compose = true }
+  composeOptions { kotlinCompilerExtensionVersion = "1.5.1" }
+  packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 dependencies {
@@ -62,6 +46,7 @@ dependencies {
   implementation(libs.compose.navigation)
   implementation(libs.material.icons.extended)
   implementation(libs.horologist.compose.layout)
+  implementation(libs.datastore.preferences)
   androidTestImplementation(platform(libs.compose.bom))
   androidTestImplementation(libs.ui.test.junit4)
   debugImplementation(libs.ui.tooling)

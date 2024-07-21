@@ -43,11 +43,12 @@ fun TickingPage(tempo: Long, onStop: () -> Unit) {
   val lifecycleState = getLifecycleState()
   val coroutineScope = rememberCoroutineScope()
   DisposableEffect(vibrator, tempo, lifecycleState == Lifecycle.State.RESUMED) {
-    val job = coroutineScope.launch {
-      if (lifecycleState == Lifecycle.State.RESUMED) {
-        vibrator.vibrate(createTempoVibrationWaveform(tempo))
+    val job =
+      coroutineScope.launch {
+        if (lifecycleState == Lifecycle.State.RESUMED) {
+          vibrator.vibrate(createTempoVibrationWaveform(tempo))
+        }
       }
-    }
 
     onDispose {
       job.cancel()
@@ -67,31 +68,23 @@ fun TickingPage(tempo: Long, onStop: () -> Unit) {
 @Composable
 fun TickingPageUi(tempo: Long, onStop: () -> Unit) {
   Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(MaterialTheme.colors.background)
-      .border(
-        width = 5.dp,
-        color = MaterialTheme.colors.primary,
-        shape = getScreenShape()
-      )
-      .padding(5.dp),
+    modifier =
+      Modifier.fillMaxSize()
+        .background(MaterialTheme.colors.background)
+        .border(width = 5.dp, color = MaterialTheme.colors.primary, shape = getScreenShape())
+        .padding(5.dp)
   ) {
     TopTitle(title = "Tempo: $tempo")
     Column(
-      modifier = Modifier
-        .fillMaxRectangle(),
+      modifier = Modifier.fillMaxRectangle(),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      OutlinedButton(
-        modifier = Modifier.size(ButtonDefaults.LargeButtonSize),
-        onClick = onStop
-      ) {
+      OutlinedButton(modifier = Modifier.size(ButtonDefaults.LargeButtonSize), onClick = onStop) {
         Icon(
           modifier = Modifier.size(ButtonDefaults.LargeIconSize),
           imageVector = Icons.Rounded.Stop,
-          contentDescription = "stop metronome"
+          contentDescription = "stop metronome",
         )
       }
     }
@@ -101,26 +94,27 @@ fun TickingPageUi(tempo: Long, onStop: () -> Unit) {
 @Preview(device = WearDevices.LARGE_ROUND, showSystemUi = true)
 @Composable
 fun TickingPagePreview() {
-  MetronomeTheme {
-    TickingPageUi(tempo = 67, onStop = {})
-  }
+  MetronomeTheme { TickingPageUi(tempo = 67, onStop = {}) }
 }
 
-fun createTempoVibrationWaveform(tempo: Long): VibrationEffect = VibrationEffect.createWaveform(
-  run {
-    val beatInterval = tempoToInterval(tempo)
-    val beatVibrateDuration = min(100.0, beatInterval.toFloat() * 0.5).toLong()
-    listOf(beatVibrateDuration, beatInterval - beatVibrateDuration).toLongArray()
-  }, intArrayOf(255, 0), 0
-)
+fun createTempoVibrationWaveform(tempo: Long): VibrationEffect =
+  VibrationEffect.createWaveform(
+    run {
+      val beatInterval = tempoToInterval(tempo)
+      val beatVibrateDuration = min(100.0, beatInterval.toFloat() * 0.5).toLong()
+      listOf(beatVibrateDuration, beatInterval - beatVibrateDuration).toLongArray()
+    },
+    intArrayOf(255, 0),
+    0,
+  )
 
 @Composable
 fun useVibrator(): Vibrator {
-  if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-    return LocalContext.current.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+  return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+    LocalContext.current.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
   } else {
     val vibratorManager =
       LocalContext.current.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-    return vibratorManager.defaultVibrator
+    vibratorManager.defaultVibrator
   }
 }
