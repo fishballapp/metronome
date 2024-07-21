@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Switch
@@ -55,7 +54,7 @@ fun SettingsPage() {
       item {
         ToggleChip(
           modifier = Modifier.fillMaxWidth(),
-          label = { Text("Freeze tempo while running") },
+          label = { Text("Freeze Playing Tempo") },
           checked = false,
           onCheckedChange = {
             coroutineScope.launch { localUserSettings.updateFreezeTempo(!userSettings.freezeTempo) }
@@ -64,6 +63,21 @@ fun SettingsPage() {
         )
       }
 
+      item {
+        ToggleChip(
+          modifier = Modifier.fillMaxWidth(),
+          label = { Text("Tap Tempo Only") },
+          checked = false,
+          onCheckedChange = {
+            coroutineScope.launch {
+              localUserSettings.updatePickDisabled(!userSettings.pickerDisabled)
+            }
+          },
+          toggleControl = { Switch(checked = userSettings.pickerDisabled) },
+        )
+      }
+
+      /* maybe setting tempo step size is a bad idea; but keeping this chip as the styling took me some time
       item {
         Chip(
           modifier = Modifier.fillMaxWidth(),
@@ -85,6 +99,7 @@ fun SettingsPage() {
           },
         )
       }
+       */
 
       item {
         PlayStoreActionChip(

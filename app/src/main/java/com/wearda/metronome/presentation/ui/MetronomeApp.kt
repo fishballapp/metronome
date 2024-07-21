@@ -46,6 +46,7 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
             when (it) {
               0 -> {
                 TempoPage(
+                  disablePicker = userSettings.pickerDisabled,
                   isTicking = isTicking,
                   tempo = tempo,
                   canSetTempo = !(userSettings.freezeTempo && isTicking),

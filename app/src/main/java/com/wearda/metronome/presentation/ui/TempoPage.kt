@@ -29,11 +29,12 @@ import com.google.android.horologist.compose.layout.fillMaxRectangle
 import com.wearda.metronome.presentation.composables.getLifecycleState
 import com.wearda.metronome.presentation.composables.getScreenShape
 import com.wearda.metronome.presentation.util.tempoToInterval
-import kotlin.math.min
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 @Composable
 fun TempoPage(
+  disablePicker: Boolean,
   canSetTempo: Boolean,
   isTicking: Boolean,
   tempo: Long,
@@ -76,7 +77,7 @@ fun TempoPage(
     TopTitle("Tap / Set Tempo")
     Box(modifier = Modifier.fillMaxRectangle()) {
       TempoPicker(
-        disabled = !canSetTempo,
+        disabled = disablePicker || !canSetTempo,
         tempo = tempo,
         onSetTempo = onSetTempo,
         modifier = Modifier.fillMaxSize(),
