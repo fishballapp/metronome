@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -20,8 +21,6 @@ import com.wearda.metronome.presentation.DEFAULT_TEMPO
 import com.wearda.metronome.presentation.compositionlocals.LocalUserSettings
 import com.wearda.metronome.presentation.models.DEFAULT_USER_SETTINGS
 import com.wearda.metronome.presentation.theme.MetronomeTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class AppContext(val setKeepScreenOn: (Boolean) -> Unit)
 
@@ -31,6 +30,7 @@ val LocalAppContext = compositionLocalOf {
   )
 }
 
+@OptIn(ExperimentalWearFoundationApi::class)
 @Composable
 fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
   var tempo by remember { mutableLongStateOf(DEFAULT_TEMPO) }
@@ -44,6 +44,12 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
   val coroutineScope = rememberCoroutineScope()
 
   val pagerState = rememberPagerState { 2 }
+  val onProceed: () -> Unit = {
+    navController.popBackStack()
+    isTicking = true
+  }
+
+  val onDismiss: () -> Unit = { navController.popBackStack() }
   CompositionLocalProvider(LocalAppContext provides AppContext(setKeepScreenOn)) {
     MetronomeTheme {
       SwipeDismissableNavHost(navController = navController, startDestination = "tempoSet") {
@@ -78,6 +84,7 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
                     }
                   },
                 )
+                // Button(onClick = { navController.navigate("slowTempoAlert") }) { Text("go") }
               }
               1 -> {
                 SettingsPage()
@@ -86,26 +93,15 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
           }
         }
 
-        run {
-          val onProceed: () -> Unit = {
-            navController.popBackStack()
-            coroutineScope.launch {
-              delay(100) // why?
-              isTicking = true
-            }
-          }
-
-          val onDismiss: () -> Unit = { navController.popBackStack() }
-          composable("slowTempoAlert") {
-            SlowTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
-          }
-
-          composable("fastTempoAlert") {
-            FastTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
-          }
-
-          composable("zeroBPMAlert") { ZeroBPMAlert(onDismiss) }
+        composable("slowTempoAlert") {
+          SlowTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
         }
+
+        composable("fastTempoAlert") {
+          FastTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
+        }
+
+        composable("zeroBPMAlert") { ZeroBPMAlert(onDismiss) }
       }
     }
   }

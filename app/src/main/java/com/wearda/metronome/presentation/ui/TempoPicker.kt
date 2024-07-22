@@ -32,7 +32,6 @@ fun TempoPicker(
       initialNumberOfOptions = 300,
       initiallySelectedOption = remember { tempo.toInt() },
     )
-  val focusRequester = rememberActiveFocusRequester()
 
   LaunchedEffect(tempo) { tempoPickerState.scrollToOption(tempo.toInt()) }
 
@@ -45,17 +44,19 @@ fun TempoPicker(
   Picker(
     userScrollEnabled = !disabled,
     modifier =
-      modifier
-        .onRotaryScrollEvent {
-          if (disabled) return@onRotaryScrollEvent false
-          coroutineScope.launch {
-            tempoPickerState.scrollBy(it.verticalScrollPixels)
-            tempoPickerState.animateScrollBy(0f)
-          }
-          true
-        }
-        .focusRequester(focusRequester)
-        .focusable(),
+      modifier.then(
+        if (!disabled)
+          Modifier.onRotaryScrollEvent {
+              coroutineScope.launch {
+                tempoPickerState.scrollBy(it.verticalScrollPixels)
+                tempoPickerState.animateScrollBy(0f)
+              }
+              true
+            }
+            .focusRequester(rememberActiveFocusRequester())
+            .focusable()
+        else Modifier
+      ),
     state = tempoPickerState,
     contentDescription = "Tempo",
   ) {
