@@ -2,6 +2,7 @@ package com.wearda.metronome.presentation.ui
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,8 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Switch
@@ -107,6 +110,19 @@ fun SettingsPage() {
             ChipDefaults.outlinedChipColors(contentColor = MaterialTheme.colors.onBackground),
           border = ChipDefaults.outlinedChipBorder(borderColor = MaterialTheme.colors.onBackground),
         )
+      }
+
+      item {
+        Column(
+          modifier = Modifier.padding(ChipDefaults.ContentPadding),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          Text("Made with ❤️ by Wearda", style = MaterialTheme.typography.caption3)
+          Text(
+            "Feel free to contact us: yo@wearda.com",
+            style = MaterialTheme.typography.caption3.copy(fontSize = 1.2f.em),
+          )
+        }
       }
     }
   }

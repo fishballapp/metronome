@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
@@ -38,22 +37,15 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
 
   val navController = rememberSwipeDismissableNavController()
 
-  val userSettings by
-    LocalUserSettings.current.userPreferencesFlow.collectAsState(initial = DEFAULT_USER_SETTINGS)
-
-  val coroutineScope = rememberCoroutineScope()
-
-  val pagerState = rememberPagerState { 2 }
-  val onProceed: () -> Unit = {
-    navController.popBackStack()
-    isTicking = true
-  }
-
-  val onDismiss: () -> Unit = { navController.popBackStack() }
   CompositionLocalProvider(LocalAppContext provides AppContext(setKeepScreenOn)) {
     MetronomeTheme {
       SwipeDismissableNavHost(navController = navController, startDestination = "tempoSet") {
         composable("tempoSet") {
+          val userSettings by
+            LocalUserSettings.current.userPreferencesFlow.collectAsState(
+              initial = DEFAULT_USER_SETTINGS
+            )
+          val pagerState = rememberPagerState { 2 }
           PagerScreen(state = pagerState) {
             when (it) {
               0 -> {
@@ -84,7 +76,6 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
                     }
                   },
                 )
-                // Button(onClick = { navController.navigate("slowTempoAlert") }) { Text("go") }
               }
               1 -> {
                 SettingsPage()
@@ -93,15 +84,24 @@ fun MetronomeApp(setKeepScreenOn: (Boolean) -> Unit = {}) {
           }
         }
 
-        composable("slowTempoAlert") {
-          SlowTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
-        }
+        run {
+          val onProceed: () -> Unit = {
+            navController.popBackStack()
+            isTicking = true
+          }
 
-        composable("fastTempoAlert") {
-          FastTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
-        }
+          val onDismiss: () -> Unit = { navController.popBackStack() }
 
-        composable("zeroBPMAlert") { ZeroBPMAlert(onDismiss) }
+          composable("slowTempoAlert") {
+            SlowTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
+          }
+
+          composable("fastTempoAlert") {
+            FastTempoAlert(tempo = tempo, onProceed = onProceed, onDismiss = onDismiss)
+          }
+
+          composable("zeroBPMAlert") { ZeroBPMAlert(onDismiss) }
+        }
       }
     }
   }
